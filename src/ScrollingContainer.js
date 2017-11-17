@@ -136,6 +136,7 @@ ScrollingContainer.prototype.initScrolling = function () {
         lastPosition = new PIXI.Point(),
         Position = new PIXI.Point(),
         Speed = new PIXI.Point(),
+        localOffset = new PIXI.Point();
         stop,
         self = this;
 
@@ -269,8 +270,6 @@ ScrollingContainer.prototype.initScrolling = function () {
 
     //Drag scroll
     if (this.dragScrolling) {
-        this._localOffset = new PIXI.Point();
-
         var drag = new DragEvent(this);
 
         drag.onDragStart = function (e) {
@@ -284,12 +283,12 @@ ScrollingContainer.prototype.initScrolling = function () {
         };
 
         drag.onDragMove = function (e, offset) {
-            localizeVector(this.innerContainer, offset, this._localOffset);
+            localizeVector(this.innerContainer, offset, localOffset);
 
             if (this.scrollX)
-                targetPosition.x = containerStart.x + this._localOffset.x;
+                targetPosition.x = containerStart.x + localOffset.x;
             if (this.scrollY)
-                targetPosition.y = containerStart.y + this._localOffset.y;
+                targetPosition.y = containerStart.y + localOffset.y;
         };
 
         drag.onDragEnd = function (e) {
