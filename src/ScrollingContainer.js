@@ -136,6 +136,7 @@ ScrollingContainer.prototype.initScrolling = function () {
         Position = new PIXI.Point(),
         Speed = new PIXI.Point(),
         stop,
+        limitsReached = {},
         self = this;
 
     this.forcePctPosition = function (direction, pct) {
@@ -206,6 +207,7 @@ ScrollingContainer.prototype.initScrolling = function () {
         if (stop) {
             Ticker.removeListener("update", this.updateScrollPosition);
             this.animating = false;
+            limitsReached = {};
         }
     };
 
@@ -248,10 +250,14 @@ ScrollingContainer.prototype.initScrolling = function () {
             if (targetPosition[direction] > 0) {
                 Speed[direction] = 0;
                 Position[direction] = 100 * this.softness * (1 - Math.exp(targetPosition[direction] / -200));
+
+                self._checkLimit('min' + direction.toUpperCase());
             }
             else if (targetPosition[direction] < min) {
                 Speed[direction] = 0;
                 Position[direction] = min - (100 * this.softness * (1 - Math.exp((min - targetPosition[direction]) / -200)));
+
+                self._checkLimit('max' + direction.toUpperCase());
             }
             else {
                 Position[direction] = targetPosition[direction];
@@ -265,6 +271,12 @@ ScrollingContainer.prototype.initScrolling = function () {
 
     };
 
+    this._checkLimit = function (limitName) {
+        if (!(limitName in limitsReached)) {
+            limitsReached[limitName] = true;
+            self.emit(limitName + "Overflow");
+        }
+    }
 
     //Drag scroll
     if (this.dragScrolling) {
