@@ -3,7 +3,8 @@ var UIBase = require('./UIBase'),
     MathHelper = require('./MathHelper'),
     Ticker = require('./Ticker'),
     DragEvent = require('./Interaction/DragEvent'),
-    MouseScrollEvent = require('./Interaction/MouseScrollEvent');
+    MouseScrollEvent = require('./Interaction/MouseScrollEvent'),
+    localizeVector = require('./Utils/LocalizeVector');
 
 
 /**
@@ -135,6 +136,7 @@ ScrollingContainer.prototype.initScrolling = function () {
         lastPosition = new PIXI.Point(),
         Position = new PIXI.Point(),
         Speed = new PIXI.Point(),
+        localOffset = new PIXI.Point();
         stop,
         self = this;
 
@@ -269,6 +271,7 @@ ScrollingContainer.prototype.initScrolling = function () {
     //Drag scroll
     if (this.dragScrolling) {
         var drag = new DragEvent(this);
+
         drag.onDragStart = function (e) {
             if (!this.scrolling) {
                 containerStart.copy(container.position);
@@ -280,10 +283,12 @@ ScrollingContainer.prototype.initScrolling = function () {
         };
 
         drag.onDragMove = function (e, offset) {
+            localizeVector(this.innerContainer, offset, localOffset);
+
             if (this.scrollX)
-                targetPosition.x = containerStart.x + offset.x;
+                targetPosition.x = containerStart.x + localOffset.x;
             if (this.scrollY)
-                targetPosition.y = containerStart.y + offset.y;
+                targetPosition.y = containerStart.y + localOffset.y;
         };
 
         drag.onDragEnd = function (e) {
