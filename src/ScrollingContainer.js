@@ -3,7 +3,8 @@ var UIBase = require('./UIBase'),
     MathHelper = require('./MathHelper'),
     Ticker = require('./Ticker'),
     DragEvent = require('./Interaction/DragEvent'),
-    MouseScrollEvent = require('./Interaction/MouseScrollEvent');
+    MouseScrollEvent = require('./Interaction/MouseScrollEvent'),
+    localizeVector = require('./Utils/LocalizeVector');
 
 
 /**
@@ -280,10 +281,12 @@ ScrollingContainer.prototype.initScrolling = function () {
         };
 
         drag.onDragMove = function (e, offset) {
+            const localOffset = localizeVector(this.innerContainer, offset);
+
             if (this.scrollX)
-                targetPosition.x = containerStart.x + offset.x;
+                targetPosition.x = containerStart.x + localOffset.x;
             if (this.scrollY)
-                targetPosition.y = containerStart.y + offset.y;
+                targetPosition.y = containerStart.y + localOffset.y;
         };
 
         drag.onDragEnd = function (e) {
