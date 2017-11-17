@@ -1,10 +1,14 @@
-function localizeVector(localDisplayObject, globalVector) {
-    const globalPosition = localDisplayObject.getGlobalPosition();
-    const globalPoint = {
-        x: globalVector.x + globalPosition.x,
-        y: globalVector.y + globalPosition.y
-    };
-    return localDisplayObject.toLocal(globalPoint);
+const from = undefined,
+      skipUpdate = true;
+
+var globalPoint = new PIXI.Point();
+
+function localizeVector(localDisplayObject, globalVector, localVector) {
+    localDisplayObject.getGlobalPosition(globalPoint);
+    globalPoint.x += globalVector.x;
+    globalPoint.y += globalVector.y;
+
+    return localDisplayObject.toLocal(globalPoint, from, localVector, skipUpdate);
 }
 
 module.exports = localizeVector;
