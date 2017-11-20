@@ -1,5 +1,4 @@
-const from = undefined,
-      skipUpdate = true;
+var skipUpdate = true;
 
 var globalPoint = new PIXI.Point();
 
@@ -8,7 +7,7 @@ function localizeVector(localDisplayObject, globalVector, localVector) {
     globalPoint.x += globalVector.x;
     globalPoint.y += globalVector.y;
 
-    return localDisplayObject.toLocal(globalPoint, from, localVector, skipUpdate);
+    return localDisplayObject.toLocal(globalPoint, undefined, localVector, skipUpdate);
 }
 
 module.exports = localizeVector;
