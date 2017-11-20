@@ -136,7 +136,7 @@ ScrollingContainer.prototype.initScrolling = function () {
         lastPosition = new PIXI.Point(),
         Position = new PIXI.Point(),
         Speed = new PIXI.Point(),
-        localOffset = new PIXI.Point();
+        localOffset = new PIXI.Point(),
         stop,
         limitsReached = {},
         self = this;
@@ -278,7 +278,7 @@ ScrollingContainer.prototype.initScrolling = function () {
             limitsReached[limitName] = true;
             self.emit(limitName + "Overflow");
         }
-    }
+    };
 
     //Drag scroll
     if (this.dragScrolling) {
