@@ -214,6 +214,8 @@ ScrollingContainer.prototype.initScrolling = function () {
 
 
     this.updateDirection = function (direction, delta) {
+        self._checkLimits(direction);
+
         var bounds = this.getInnerBounds();
 
         var min;
@@ -266,6 +268,39 @@ ScrollingContainer.prototype.initScrolling = function () {
         self.updateScrollBars();
     };
 
+    this._checkLimits = function (direction) {
+        if (!this.scrolling && Math.round(Speed[direction]) === 0) {
+            return;
+        }
+
+        var bounds = this.getInnerBounds();
+
+        var maxScrollDistance = (direction == "y") ?
+            Math.round(Math.min(0, this._height - bounds.height)) :
+            Math.round(Math.min(0, this._width - bounds.width));
+
+        var minReached = targetPosition[direction] >= 0;
+        var maxReached = targetPosition[direction] <= maxScrollDistance;
+
+        if (minReached) {
+            self.emit("min" + direction.toUpperCase() + "Overflow");
+        }
+        if (maxReached) {
+            self.emit("max" + direction.toUpperCase() + "Overflow");
+        }
+
+        if ((minReached || maxReached) && self._boundsChanged(bounds)) {
+            self._checkLimits(direction);
+        }
+    }
+
+    this._boundsChanged = function (currentBounds) {
+        var initialBounds = currentBounds.clone();
+        var updatedBounds = this.getInnerBounds(true);
+
+        return (initialBounds.width !== updatedBounds.width ||
+            initialBounds.height !== updatedBounds.height);
+    }
 
     //Drag scroll
     if (this.dragScrolling) {
