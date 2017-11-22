@@ -275,21 +275,24 @@ ScrollingContainer.prototype.initScrolling = function () {
 
         var bounds = this.getInnerBounds();
 
-        var maxScrollDistance = (direction == "y") ?
+        var minimumLimit = (direction == "y") ?
             Math.round(Math.min(0, this._height - bounds.height)) :
             Math.round(Math.min(0, this._width - bounds.width));
 
-        var minReached = targetPosition[direction] >= 0;
-        var maxReached = targetPosition[direction] <= maxScrollDistance;
+        var maxLimit = targetPosition[direction] >= 0;
+        var minLimit = targetPosition[direction] <= minimumLimit;
 
-        if (minReached) {
-            self.emit("min" + direction.toUpperCase() + "Overflow");
-        }
-        if (maxReached) {
-            self.emit("max" + direction.toUpperCase() + "Overflow");
+        if (direction === "x" && maxLimit) {
+            self.emit("leftReached");
+        } else if (direction === "x" && minLimit) {
+            self.emit("rightReached");
+        } else if (direction === "y" && maxLimit) {
+            self.emit("topReached");
+        } else if (direction === "y" && minLimit) {
+            self.emit("bottomReached");
         }
 
-        if ((minReached || maxReached) && self._boundsChanged(bounds)) {
+        if ((maxLimit || minLimit) && self._boundsChanged(bounds)) {
             self._checkLimits(direction);
         }
     }
