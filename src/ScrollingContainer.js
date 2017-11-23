@@ -138,7 +138,6 @@ ScrollingContainer.prototype.initScrolling = function () {
         Speed = new PIXI.Point(),
         localOffset = new PIXI.Point(),
         stop,
-        limitsReached = {},
         self = this;
 
     this.forcePctPosition = function (direction, pct) {
@@ -209,13 +208,14 @@ ScrollingContainer.prototype.initScrolling = function () {
         if (stop) {
             Ticker.removeListener("update", this.updateScrollPosition);
             this.animating = false;
-            limitsReached = {};
         }
     };
 
 
 
     this.updateDirection = function (direction, delta) {
+        self._checkLimits(direction);
+
         var bounds = this.getInnerBounds();
 
         var min;
@@ -252,14 +252,10 @@ ScrollingContainer.prototype.initScrolling = function () {
             if (targetPosition[direction] > 0) {
                 Speed[direction] = 0;
                 Position[direction] = 100 * this.softness * (1 - Math.exp(targetPosition[direction] / -200));
-
-                self._checkLimit('min' + direction.toUpperCase());
             }
             else if (targetPosition[direction] < min) {
                 Speed[direction] = 0;
                 Position[direction] = min - (100 * this.softness * (1 - Math.exp((min - targetPosition[direction]) / -200)));
-
-                self._checkLimit('max' + direction.toUpperCase());
             }
             else {
                 Position[direction] = targetPosition[direction];
@@ -270,15 +266,44 @@ ScrollingContainer.prototype.initScrolling = function () {
         container.position[direction] = Math.round(Position[direction]);
 
         self.updateScrollBars();
-
     };
 
-    this._checkLimit = function (limitName) {
-        if (!(limitName in limitsReached)) {
-            limitsReached[limitName] = true;
-            self.emit(limitName + "Overflow");
+    this._checkLimits = function (direction) {
+        if (!this.scrolling && Math.round(Speed[direction]) === 0) {
+            return;
         }
-    };
+
+        var bounds = this.getInnerBounds();
+
+        var minimumLimit = (direction == "y") ?
+            Math.round(Math.min(0, this._height - bounds.height)) :
+            Math.round(Math.min(0, this._width - bounds.width));
+
+        var maxLimit = targetPosition[direction] >= 0;
+        var minLimit = targetPosition[direction] <= minimumLimit;
+
+        if (direction === "x" && maxLimit) {
+            self.emit("leftReached");
+        } else if (direction === "x" && minLimit) {
+            self.emit("rightReached");
+        } else if (direction === "y" && maxLimit) {
+            self.emit("topReached");
+        } else if (direction === "y" && minLimit) {
+            self.emit("bottomReached");
+        }
+
+        if ((maxLimit || minLimit) && self._boundsChanged(bounds)) {
+            self._checkLimits(direction);
+        }
+    }
+
+    this._boundsChanged = function (currentBounds) {
+        var initialBounds = currentBounds.clone();
+        var updatedBounds = this.getInnerBounds(true);
+
+        return (initialBounds.width !== updatedBounds.width ||
+            initialBounds.height !== updatedBounds.height);
+    }
 
     //Drag scroll
     if (this.dragScrolling) {
